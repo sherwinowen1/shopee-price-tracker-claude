@@ -129,13 +129,14 @@ class GoogleSheetsManager:
             if sheet_name not in sheet_names:
                 self._create_sheet(sheet_name)
             
-            # Write headers
+            # Write headers (expanded columns)
             headers = [
-                ['Product Name', 'Product ID', 'Price', 'Discount (%)', 
-                 'Shop Name', 'Rating', 'URL', 'Timestamp']
+                ['Product Name', 'Product ID', 'Price', 'Original Price', 'Savings Amount',
+                 'Discount (%)', 'Shop Name', 'Rating', 'Category', 'Stock Status', 
+                 'Reviews Count', 'Notes', 'URL', 'Timestamp']
             ]
             
-            range_name = f"'{sheet_name}'!A1:H1"
+            range_name = f"'{sheet_name}'!A1:N1"
             
             self.service.spreadsheets().values().update(
                 spreadsheetId=self.spreadsheet_id,
@@ -166,14 +167,20 @@ class GoogleSheetsManager:
                 product_data.get('name', ''),
                 product_data.get('product_id', ''),
                 product_data.get('price', ''),
+                product_data.get('original_price', ''),
+                product_data.get('savings_amount', ''),
                 product_data.get('discount', ''),
                 product_data.get('shop_name', ''),
                 product_data.get('rating', ''),
+                product_data.get('category', ''),
+                product_data.get('stock_status', ''),
+                product_data.get('reviews_count', ''),
+                '',  # Notes column (for manual entry)
                 product_data.get('url', ''),
                 product_data.get('timestamp', '')
             ]]
             
-            range_name = f"'{sheet_name}'!A:H"
+            range_name = f"'{sheet_name}'!A:N"
             
             self.service.spreadsheets().values().append(
                 spreadsheetId=self.spreadsheet_id,
@@ -217,7 +224,7 @@ class GoogleSheetsManager:
             List of price records
         """
         try:
-            range_name = f"'{sheet_name}'!A:H"
+            range_name = f"'{sheet_name}'!A:N"
             
             result = self.service.spreadsheets().values().get(
                 spreadsheetId=self.spreadsheet_id,
@@ -278,4 +285,36 @@ class GoogleSheetsManager:
             return True
         except Exception as e:
             app_logger.error(f"Error creating summary sheet: {e}")
+            return False
+    
+    def apply_formulas_to_row(self, sheet_name: str = "Price Tracker", row_num: int = 2) -> bool:
+        """
+        Apply formulas to calculated columns in a row
+        
+        Args:
+            sheet_name: Name of the sheet
+            row_num: Row number to apply formulas to (default: 2 for first data row)
+            
+        Returns:
+            True if successful
+        """
+        try:
+            # Formula for Savings Amount (column E): Original Price - Price
+            # Column D is Original Price, Column C is Price
+            savings_formula = f"=D{row_num}-C{row_num}"
+            
+            # Update the Savings Amount cell with formula
+            range_name = f"'{sheet_name}'!E{row_num}"
+            
+            self.service.spreadsheets().values().update(
+                spreadsheetId=self.spreadsheet_id,
+                range=range_name,
+                valueInputOption='USER_ENTERED',  # USER_ENTERED allows formulas
+                body={'values': [[savings_formula]]}
+            ).execute()
+            
+            app_logger.debug(f"Applied formula to row {row_num}: {savings_formula}")
+            return True
+        except Exception as e:
+            app_logger.error(f"Error applying formulas: {e}")
             return False

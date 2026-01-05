@@ -637,6 +637,9 @@ class ShopeeScraper:
                 'discount': 32,
                 'shop_name': 'Adventure Gear Store',
                 'rating': 4.7,
+                'category': 'Outdoor & Camping',
+                'stock_status': 'In Stock',
+                'reviews_count': 1243,
             },
             # Adidas shoes
             '27785404088': {
@@ -645,6 +648,9 @@ class ShopeeScraper:
                 'discount': 38,
                 'shop_name': 'Official Adidas Shop',
                 'rating': 4.8,
+                'category': 'Footwear',
+                'stock_status': 'In Stock',
+                'reviews_count': 5621,
             },
             # Crocs sandal
             '25956400196': {
@@ -653,6 +659,9 @@ class ShopeeScraper:
                 'discount': 17,
                 'shop_name': 'Official Crocs Store',
                 'rating': 4.9,
+                'category': 'Footwear',
+                'stock_status': 'In Stock',
+                'reviews_count': 3421,
             },
             # Default demo product
             'default': {
@@ -661,6 +670,9 @@ class ShopeeScraper:
                 'discount': 36,
                 'shop_name': 'Shopee Seller',
                 'rating': 4.6,
+                'category': 'General',
+                'stock_status': 'In Stock',
+                'reviews_count': 856,
             }
         }
         
@@ -670,15 +682,22 @@ class ShopeeScraper:
         app_logger.info(f"Real product name: {product_name}")
         app_logger.info(f"See REAL_SCRAPING_STATUS.md for alternatives and how to use real prices")
         
+        # Calculate savings amount
+        savings_amount = demo['original_price'] - demo['price']
+        
         return {
             'product_id': product_id,
             'name': product_name,
             'url': url,
             'price': demo['price'],
             'original_price': demo['original_price'],
+            'savings_amount': savings_amount,
             'discount': demo['discount'],
             'shop_name': demo['shop_name'],
             'rating': demo['rating'],
+            'category': demo['category'],
+            'stock_status': demo['stock_status'],
+            'reviews_count': demo['reviews_count'],
             'timestamp': datetime.now().isoformat(),
             'demo': True
         }

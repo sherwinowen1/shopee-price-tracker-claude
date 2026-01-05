@@ -48,6 +48,14 @@ class PriceTracker:
             # Save to Google Sheets
             if self.sheets.append_price_data(product_data):
                 app_logger.info(f"Saved to Google Sheets: {product_data.get('name')}")
+                
+                # Apply formulas to the newly added row
+                # Get current row count to apply formula to the last row
+                try:
+                    self.sheets.apply_formulas_to_row()
+                except Exception as e:
+                    app_logger.debug(f"Could not apply formulas automatically: {e}")
+                
                 return product_data
             else:
                 app_logger.error(f"Failed to save to Google Sheets: {product_data.get('name')}")
