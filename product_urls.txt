@@ -1,0 +1,7 @@
+# Shopee Product URLs to Track
+# Add your product URLs here (one per line)
+# Format: https://shopee.ph/[product-name]-i.[shop-id].[product-id]
+
+https://shopee.ph/Crocs-Classic-Sandal-V2-in-White-i.159408769.25956400196
+https://shopee.ph/Crocs-Classic-Sandal-V2-in-Blue-Calcite-i.159408769.27073653254
+https://shopee.ph/Crocs-Classic-Sandal-V2-in-Black-i.159408769.25956400148

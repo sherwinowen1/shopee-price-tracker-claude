@@ -93,6 +93,60 @@ class ShopeeScraper:
             app_logger.debug(f"Error extracting product name from URL: {e}")
             return None
     
+    def scrape_category_products(self, category_url: str) -> list:
+        """
+        Scrape all product links from a category/search page
+        
+        Args:
+            category_url: Shopee category URL (e.g., https://shopee.ph/Crocs-Classic-Sandal-V2)
+            
+        Returns:
+            List of product URLs found on the page
+        """
+        try:
+            app_logger.info(f"Scraping category page: {category_url}")
+            
+            response = requests.get(
+                category_url,
+                headers=self.headers,
+                timeout=self.timeout,
+                allow_redirects=True
+            )
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.text, 'html.parser')
+            product_links = []
+            
+            # Try multiple selectors to find product links
+            selectors = [
+                'a[href*="-i."][href*="."]',  # Links with -i. and product IDs
+                'a.shopee-search-item-result__item',  # Shopee specific class
+                'a[data-testid*="product"]',  # Test ID based
+            ]
+            
+            for selector in selectors:
+                elements = soup.select(selector)
+                for elem in elements:
+                    href = elem.get('href')
+                    if href:
+                        # Convert relative URLs to absolute
+                        if href.startswith('/'):
+                            href = f"https://shopee.ph{href}"
+                        elif not href.startswith('http'):
+                            href = f"https://shopee.ph/{href}"
+                        
+                        # Verify it's a valid product URL (has -i. pattern)
+                        if '-i.' in href and re.search(r'-i\.\d+\.\d+', href):
+                            if href not in product_links:
+                                product_links.append(href)
+            
+            app_logger.info(f"Found {len(product_links)} products on category page")
+            return product_links
+            
+        except Exception as e:
+            app_logger.error(f"Error scraping category page: {e}")
+            return []
+    
     def scrape_product(self, url: str) -> Optional[Dict]:
         """
         Scrape product information from Shopee
